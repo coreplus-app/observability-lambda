@@ -36,8 +36,8 @@ export const lambdaHandler = async (event: CloudWatchLogsEvent): Promise<APIGate
         }
 
         // AWS clients
-        const cloudWatchClient = new CloudWatchClient({ region: "us-east-1" });
-        const cloudWatchLogClient = new CloudWatchLogsClient({ region: "us-east-1" });
+        const cloudWatchClient = new CloudWatchClient({ region: process.env.Region || "us-east-1" });
+        const cloudWatchLogClient = new CloudWatchLogsClient({ region: process.env.Region || "us-east-1" });
         
         let logsProcessed = 0;
         let logsUnprocessed = 0;
@@ -53,7 +53,7 @@ export const lambdaHandler = async (event: CloudWatchLogsEvent): Promise<APIGate
         const orangeTick = "![alt text Base 64 inline image](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAACi0lEQVRIiY2VP2gUQRjFf285QrBKEY6rQqqgcrVwVSDkj4UINhLMtZaSaJMitaiNIFbBNhvSGqIo0daAhZWECCFYpbgqpJAQQp7F7tzN7c2dbrMPvm/fvPfNmx0x4nFOA5g3LAiaNnUJgA5wCOwDX7TC6TAOJUgB6oZ1wSOgURRS3d3FtoEXQEcr/cUs8cE85gB4FsgdS3H0LnAds2Y4ABZHOnBO2+YdYjwUHTW6JBZgJbC4AB5rha2+BbwFiEXMeyjI+xQX+AnmZ0nWlHhbqQd8ATzAfFIbahQKGoJNw7hi2dFCNj+yNt9Kp5ddZ4pcFnhcsIloAadZybFhmO6SqTcOuxQWDTPUQr2KbaaADYDsOmcKWJZ7ThWEqyBOhUdRLYVtHjpnKpNZxExWWew0jm04zD+BJSYxd2uIJZxIS2iO9qHCP1JIuchSDWgiUJSGLt+Q8YQRdVcagg3NDKj3s45WFlsYNaIS1zNcnGa7YrvaHKunP8nDsESWITrBsnqF/07RKAx0asARMIOL/CvIGJzrhHPqwLXNRDhg/9iKwxqwb7gfq+smyn34Q9+JjWKXwi6C87UGfJI5Q0zE9sMHkapLxPfS4R2JsYH+CBvOEB8z4BixG5+F1K5JvJSZBWYNz4e0xXgXc1wIypku/+cN0UtOd0RFbG5lbY7K/hnMr/CPck9EwB2JllY4CRfOb8yq4DI0VlMkMeeczDkZMIfSyZG4EqwCJ0Fbz1rOGvAKM5aIxB9gD7imCMWNgeSYK8Q68Dpcnak7eRl4Y6jHI+pLVGIsEh2bpxLb8b2cupN3gBawYzgfGFdlLDbniG2gRYU86SByAuYm4h6wANyGIsqGc5lDxGebPcGR2mmev+a8KHB8iBnFAAAAAElFTkSuQmCC)";
         const greenTick = "![alt text Base 64 inline image](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAcBJREFUSEu9lT1PFFEUhp9zd3a38R/YG4kxIVqawBAre2EoLI2FsaFHC1oKY20IFkbZNZRQYLEDFP6BTSTxHxhjZcPszH0NIyv7xe4yzHK7uZlznvOeez6MGzh2Awz6IGFrNcL0GrgLVAoEkCFOvNPG0WKz2bX/D8kBaKcfWwCTm0jeWO2CLiBx1AbuFXU7wq4dh437Z/e9kLRgikbHJbJ4qREMQlSiitxVHDZyEb1KrgWR4U243kBLhQg+OLNjSVszgQiO6tVkOenUYmBuFpAfyC+A+4jxePBNr50uGb/Np4/MBWsSL0YVzUSIzH4inpr0GeN2rxMZiVL/xLnKA0ybl1XlREjet+htJUvfZUH1wMSdf80MOP88y9yvimN3XG9NBTkHbaeBW6+mfg9s3mBT8p8wdwzcGtdbU0NyJ6bdJKi/rHdOX2Xm3juvb4MpLPQmw0b6mpx2ntVqtX2Mh9NMh6spufD4Z1KKZtEnYwUNK2lFKVZoUV0CUhqHzWr/gGxFbazEfSLa8dLAPlk4XFlxYgeshL0vCYsOw8aXPiVnH4txtGzw5nzQXX3Hiwzju2CjCxiCTFOWRf4pITWTsX8BcLjDGnLSWkEAAAAASUVORK5CYII=)";
         const redCross = "![alt text Base 64 inline image](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAVRJREFUSEvFll9Og0AQxr9x+dPewnoIE41/Ej0BJPiql9B4Ax/0En3SpMny0As0bfTBS+gtlMJ2DARpweIu0iKPDDO//b6ZZZfQwUMdMFBAPn1/bwcYAjgAIFrAFZhflGVd9kejt7ROAZn7/gzAUYvi5VTmmROGJ1VI0lJBCcKAcqW0qhDemIq8kCNl5tSqXf8HYeCdgN06lb/FjZSkBRwh9mOlngCc/QAxT+xeL5hH0SsBg2rcCJIlMU8iy7pwF4tHMJ8Xhb7f1y0AgDlkHcgAkKY1g+Sg3JprR4iHWgtXPGsOyZzjezcMbyLPuyOiW93IN4csm7wlJdUe1A1DRZq5kromG4CMIJ3tk63veN306OJGdumK6OLrIBs9TwAkjpR2+VfveVMQHetWZxonYGpLeVqCfATBQCTJEESHLU9IRcBzEsdX/fG4fMabrvAv33VyJfoCbarpGjUSYyYAAAAASUVORK5CYII=)";
-        const cloudwatchBaseUrl = "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/";    
+        const cloudwatchBaseUrl = process.env.CloudWatchURL || "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/";
         const streamName = "logs";
 
         for(const log of cloudWatchLog?.logEvents ?? []) {

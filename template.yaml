@@ -1,24 +1,32 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  coreplus CI/ CD Observability Lambda
+  Deployment Observability Lambda
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 120
 Resources:
-  coreplusPipelineLogsFunction:
+  PipelineLogsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: pipeline-logs
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
+      FunctionName: deployment-observability-lambda
       #LoggingConfig: # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
       #  LogFormat: JSON
       Timeout: 120
       Architectures:
       - arm64
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          CloudWatchURL: 
+            Fn::Sub: "https://${AWSRegion}.console.aws.amazon.com/cloudwatch/home?region=${AWSRegion}#logsV2:log-groups/log-group/"
+          Region: 
+            "us-east-1"
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -27,4 +35,89 @@ Resources:
         Sourcemap: true
         EntryPoints:
         - app.ts
+  lambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: deployment-observability-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: deployment-observability-lambda-LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:*
+                Resource: 
+                  - arn:aws:logs:ap-southeast-2:*:*
+                  - arn:aws:logs:ap-southeast-2:*:*:*
+                  - arn:aws:logs:ap-southeast-2:*:log-group:*:log-stream:*
+                  - arn:aws:logs:ap-southeast-2:*:destination:*
+        - PolicyName: deployment-observability-lambda-CloudWatchAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudwatch:GetDashboard
+                  - cloudwatch:GetMetricData
+                  - cloudwatch:PutMetricData
+                  - cloudwatch:*
+                Resource: arn:aws:cloudwatch::*:*/*
+
+  #Cloudwatch log group and subscription:
+  DeploymentLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: "/pipeline-deployment-logs/deployments"
+
+  LambdaCloudwatchInvokePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: PipelineLogsFunction # this is the name in cloudformation for your lambda
+    Properties:
+      FunctionName: !Ref PipelineLogsFunction
+      Principal: "logs.ap-southeast-2.amazonaws.com"
+      Action: "lambda:InvokeFunction"
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !GetAtt DeploymentLogsGroup.Arn
+
+  LambdaLogGroupSubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    DependsOn: LambdaCloudwatchInvokePermission
+    Properties:
+      LogGroupName: !Ref DeploymentLogsGroup
+      FilterPattern: ''
+      DestinationArn: !GetAtt PipelineLogsFunction.Arn
+
+  #Cloudwatch dashboard that will be manipulated:
+  #DeploymentCWDashboard:
+  #  Type: AWS::CloudWatch::Dashboard
+  #  Properties: 
+  #    DashboardName: 
+  #      Fn::Sub: "${DashboardNameString}"
+  #    DashboardBody: 
+  #      Fn::Sub: |
+  #        {
+  #          "widgets": [
+  #            {
+  #              "type": "text",
+  #              "x": 0,
+  #              "y": 0,
+  #              "width": 24,
+  #              "height": 1,
+  #              "properties": {
+  #                "markdown": "## ${DashboardNameString}"
+  #              }
+  #            }
+  #          ]
+  #        }
 

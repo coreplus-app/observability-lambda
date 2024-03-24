@@ -1,15 +1,15 @@
 {
-  "name": "hello_world",
+  "name": "observability-lambda-aws",
   "version": "1.0.0",
-  "description": "hello world sample for NodeJS",
+  "description": "Code for a AWS Lambda function, which generates CloudWatch Dashboards based on deployment pipeline logs.",
   "main": "app.js",
-  "repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
-  "author": "SAM CLI",
-  "license": "MIT",
+  "repository": "https://github.com/coreplus-app/observability-lambda",
+  "author": "Mark Pirotta",
+  "license": "Apache-2.0",
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "esbuild app.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/app.js",
-    "postbuild": "cd dist && zip -r coreplus-pipeline-lambda.zip app.js*"
+    "postbuild": "cd dist && zip -r pipeline-lambda.zip app.js*"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.458.0",
