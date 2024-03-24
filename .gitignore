@@ -1,0 +1,4 @@
+pipeline-logs/coverage
+pipeline-logs/dist
+pipeline-logs/aws-toolkit-tsconfig.json
+pipeline-logs/package-lock.json
