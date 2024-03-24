@@ -20,9 +20,9 @@
     <br> 
 </p>
 
-## 📝 Table of Contents
+## Table of Contents
 
-- [📝 Table of Contents](#-table-of-contents)
+- [Table of Contents](#table-of-contents)
 - [About ](#about-)
 - [Lambda Usage \& Configuration ](#lambda-usage--configuration-)
 - [Pipeline Configuration ](#pipeline-configuration-)
