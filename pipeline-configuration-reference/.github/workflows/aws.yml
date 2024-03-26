@@ -1,0 +1,70 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      DEPLOYMENT_START: ${{ steps.set_timer.outputs.DEPLOYMENT_START }}
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+      # Runs a single command using the runners shell
+      - name: Set timer
+        run: echo "DEPLOYMENT_START=$(date -u +%s)" >> $GITHUB_OUTPUT
+        id: set_timer
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
+  post-deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: aws cli setup
+      uses: unfor19/install-aws-cli-action@v1
+      with:
+        verison: 2
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Get build status
+      run: |
+        chmod +x scripts/githubLogToCloudWatch.sh
+        scripts/githubLogToCloudWatch.sh "post-deploy" ${{ needs.build.outputs.DEPLOYMENT_START }} ${{needs.build.result}}
+        echo ${{needs.build.outputs}}
+      env:
+        APP_NAME : ${{github.repository}}
+        GIT_COMMIT_HASH : ${{github.sha}}
+        PIPELINE_ID : ${{github.run_id}}
+        REPO_ID : ${{github.repository_id}}
+        REPO_NAME : ${{github.repository}}
+        BUILD_NAME : ${{github.workflow}}
+        BUILD_NUMBER : ${{github.run_number}}
+        GIT_URL : ${{github.repositoryUrl}}
+        BUILD_LOG_GROUP_NAME : ${{vars.BUILD_LOG_GROUP_NAME}}
+        BUILD_LOG_STREAM_NAME : ${{vars.BUILD_LOG_STREAM_NAME}}
+        CDK_REGION: ${{vars.AWS_REGION}}
+        CDK_ENV: ${{github.ref_name}}
+        DEPLOYMENT_START: ${{ needs.build.outputs.DEPLOYMENT_START }}
+      shell: bash

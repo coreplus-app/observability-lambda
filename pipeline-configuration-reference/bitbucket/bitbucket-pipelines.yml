@@ -1,0 +1,14 @@
+definitions:
+  steps:
+    - step: &build_test_app
+        name: build-and-test
+        image:
+          name: <image>
+        script:
+          - ./scripts/build.sh
+        after-script:
+          - ./scripts/log.sh $BUILD_STEP_NAME
+ 
+pipelines:
+  default:
+    - step: *build_test_app

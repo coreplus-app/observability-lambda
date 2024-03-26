@@ -1,0 +1,20 @@
+version: 0.2
+
+env:
+  shell: /bin/sh
+  variables:
+    APP_NAME: "Summit24_LiveDemo"
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18.x
+    commands:
+      - echo "$CODEBUILD_WEBHOOK_HEAD_REF"
+  build:
+    commands:
+      - echo "Building the project...."
+  post_build:
+    commands:
+      - echo "sending logs to cloudwatch"
+      - chmod +x ./scripts/codebuildToCloudWatch.sh
+      - ./scripts/codebuildToCloudWatch.sh

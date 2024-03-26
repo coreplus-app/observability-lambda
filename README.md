@@ -63,38 +63,7 @@ npm run build
 
 ## Pipeline Configuration <a name="usage"></a>
 
-If your pipeline supports the [aws-cli](https://github.com/aws/aws-cli/tree/v2) then you can surface that pipelines deployment observability into CloudWatch. 
-
-In the `post-build` or `after-script` section of your yaml files, add the following reference:
-
-```
-after-script:
-  - ./scripts/log.sh $BUILD_STEP_NAME
-``` 
-
-Log.sh:
-```
-#!/bin/bash
-set -e
-
-BUILD_STEP_NAME=$1
-
-DIR="$(cd "$(dirname "$0")" && pwd)"
-# source color vars
-. $DIR/console.sh
-
-TIMESTAMP=$(($(date +%s%N)/1000000)) && \
-aws logs put-log-events \
-  --log-group-name deployments \
-  --log-stream-name logs \
-  --log-events '[{
-    "timestamp": '"$TIMESTAMP"',
-    "message": "{\"app\": \"'"$BUILD_APP_NAME"'\", \"time_stamp\": '"$TIMESTAMP"', \"git_commit_hash\": \"'"$BITBUCKET_COMMIT"'\", \"pipeline_id\": \"'"$BITBUCKET_PIPELINE_UUID"'\", \"repo_id\": \"'"$BITBUCKET_REPO_UUID"'\", \"repo_name\": \"'"$BITBUCKET_REPO_FULL_NAME"'\", \"build_step\": \"'"$BUILD_STEP_NAME"'\", \"build_number\": \"'"$BITBUCKET_BUILD_NUMBER"'\", \"build_exit_code\": \"'"$BUILD_EXIT_CODE"'\", \"region\": \"'"$CDK_REGION"'\", \"env\": \"'"$CDK_ENV"'\", \"deployments_url\": \"'"$BITBUCKET_GIT_HTTP_ORIGIN"'/deployments\"}"
-  }]'
-```
-
-Note: The variables above are referenced from BitBucket Pipelines environment variables. Be sure to use the supported environment variables of your pipeline.
-
+[Tutorial and Sample configuration](pipeline-configuration-reference/pipeline-configuration.md)
 This will create a log in in the defined log group and stream.
 
 ## Authors <a name = "authors"></a>
