@@ -63,8 +63,8 @@ npm run build
 
 ## Pipeline Configuration <a name="usage"></a>
 
-[Tutorial and Sample configuration](pipeline-configuration-reference/pipeline-configuration.md)
-This will create a log in in the defined log group and stream.
+Please review [Tutorial and Sample configuration](pipeline-configuration-reference/pipeline-configuration.md)
+
 
 ## Authors <a name = "authors"></a>
 

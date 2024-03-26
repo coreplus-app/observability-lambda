@@ -6,3 +6,5 @@
 
 In this folder, we provided sample configurations for AWS CodeBuild, GitHub Actions and Bitbucket pipeline.
 Please note that each of the pipeline products provide slightly different deployment metadata accessbility. 
+
+This will create a log in in the defined log group and stream.
