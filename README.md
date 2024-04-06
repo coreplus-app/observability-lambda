@@ -68,7 +68,7 @@ Please review [Tutorial and Sample configuration](pipeline-configuration-referen
 
 ## Authors <a name = "authors"></a>
 
-- [@mark_pirotta](https://github.com/mark_pirotta) - Idea & Initial work
+- [@mark_pirotta](https://github.com/markpirotta) - Idea & Initial work
 - [@MirandaDora](https://github.com/MirandaDora) - Expansion on the initial work, and taking this internally to Amazon.
 
 See also the list of [contributors](https://github.com/coreplus-app/observability-lambda/contributors) who participated in this project.
